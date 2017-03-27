@@ -151,7 +151,7 @@ if action:
 
 # capture instance
 ["code_snippet", {"code":'''
-if line.get('uri.path.1') != 's':
+if not re.match(r's|faviocon\.ico|apple-touch-icon.*|robots\.txt|browserconfig\.xml', line.get('uri.path.1')):
     instance = line.get('uri.path.1')
 if instance:
     line['v1.instance'] = instance
