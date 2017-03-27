@@ -68,7 +68,7 @@
     "newtype",
 
     # misc
-    "assetfacet"
+    "assetfacet",
     "feat-nav"
 ]}],
 ["flatten_dict", {"columns": ["uri.query"]}],
