@@ -46,6 +46,7 @@
     "issueid",
     "primaryscopecontext",
     "program",
+    "project",
     "room",
     "roomcontext",
     "schedule",
