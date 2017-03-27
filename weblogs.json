@@ -1,0 +1,212 @@
+[
+["decode"],
+["json_load"],
+
+["add_filename", {"column": "filename"}],
+
+#############
+# uri parse #
+#############
+
+["join", {"columns": ["cs-host", "uri"], "output_column": "uri_"}],
+["lowercase_value", {"column": "uri_"}],
+["url_parse", {"column": "uri_"}],
+["flatten_dict", {"columns": ["uri_"]}],
+["omit", {"columns": ["uri_", "uri_.scheme", "uri_.params", "uri_.hostname", "uri_.port", "uri_.fragment"]}],
+
+["convert_to_array", {"column": "uri_.path", "separator": "/"}],
+["split_array", {"column": "uri_.path", "output_columns": ["uri_.path.0", "uri.path.1", "uri.path.2", "uri.path.3", "uri.path.4", "uri.path.5", "uri.path.6", "uri.path.7", "uri.path.8"] }],
+["omit", {"columns": ["uri_.path", "uri_.path.0"]}],
+
+["url_query_string_parse", {"column": "uri_.query", "output_column": "uri.query", "keep_parameters": [
+
+    # location indicators
+    "concept",
+    "entity",
+    "gadgettype",
+    "gadget",
+    "gadgetpath",
+    "menu",
+    "page",
+    "path",
+    "report",
+    "reportname",
+    "resolverkey",
+    "rdreport",
+
+    # oids
+    "asset",
+    "assetcontext",
+    "contextoid",
+    "conversationoid",
+    "imageoid",
+    "id",
+    "oid",
+    "oidtoken",
+    "issueid",
+    "primaryscopecontext",
+    "program",
+    "room",
+    "roomcontext",
+    "schedule",
+    "selected",
+    "stream",
+    "teamroom",
+    "topic",
+
+    # report parameters
+    "assettype",
+    "aggregationtype",
+    "duration",
+    "interval",
+    "isbycount",
+    "period",
+    "showweekends",
+
+    # detail widget parameters
+    "mode",
+    "newtype",
+
+    # misc
+    "assetfacet"
+    "feat-nav"
+]}],
+["flatten_dict", {"columns": ["uri.query"]}],
+["omit", {"columns": ["uri_.query", "uri.query"]}],
+
+# trim leading slashes
+["regex_replace", {"column": "uri.query.gadget", "regex": "^\/+", "repl_string": ""}],
+["regex_replace", {"column": "uri.query.gadgetpath", "regex": "^\/+", "repl_string": ""}],
+["regex_replace", {"column": "uri.query.page", "regex": "^\/+", "repl_string": ""}],
+["regex_replace", {"column": "uri.query.path", "regex": "^\/+", "repl_string": ""}],
+["regex_replace", {"column": "uri.query.resolverkey", "regex": "^\/+", "repl_string": ""}],
+
+# coalesce  oids
+["code_snippet", {"code":'''
+cols = (
+    'uri.query.asset',
+    'uri.query.oid',
+    'uri.query.oidtoken',
+    'uri.query.id',
+    'uri.query.topic',
+    'uri.query.stream',
+    'uri.query.conversationoid',
+    'uri.query.imageoid',
+    'uri.query.issueid',
+    'uri.query.program',
+    'uri.query.room',
+    'uri.query.schedule',
+    'uri.query.selected',
+    'uri.query.teamroom',
+    'uri.query.assetcontext',
+    'uri.query.contextoid',
+    'uri.query.roomcontext',
+    'uri.query.primaryscopecontext'
+)
+for col in cols:
+    if line.get(col):
+        oid = line[col]
+        break
+    else:
+        oid = None
+if oid:
+    line['v1.subject'] = '/'.join([line.get('uri.path.1'), oid])
+    line['v1.assettype'] = re.search(r'^\w*', oid).group()
+''', "import_list": ["re"]}],
+
+# calculate action
+["code_snippet", {"code":'''
+cols = (
+    'uri.query.concept',
+    'uri.query.gadgettype',
+    'uri.query.gadget',
+    'uri.query.gadgetpath',
+    'uri.query.menu',
+    'uri.query.page',
+    'uri.query.entity',
+    'uri.query.path',
+    'uri.query.report',
+    'uri.query.reportname',
+    'uri.query.resolverkey',
+    'uri.query.rdreport'
+)
+action = None
+for col in cols:
+    if col == 'uri.query.page' and line.get('uri.path.2') == 'rest-1.v1':
+        continue
+    if line.get(col):
+        action = line[col]
+        break
+if not action and re.match(r'\w+\.mvc', line.get('uri.path.2','')):
+    action = line.get('uri.path.2') + '/' + line.get('uri.path.3')
+if not action and re.match(r'\w+\.(v1|img|aspx)', line.get('uri.path.2','')):
+    action = line['uri.path.2']
+if not action and line.get('uri.path.2') == 'api':
+    action = line.get('uri.path.3') + '/' + line.get('uri.path.4')
+if not action and line.get('uri.path.1') == 's':
+    action = 's'
+if action:
+    line['v1.action'] = action
+''', "import_list": ["re"]}],
+
+# capture instance
+["code_snippet", {"code":'''
+if line.get('uri.path.1') != 's':
+    instance = line.get('uri.path.1')
+if instance:
+    line['v1.instance'] = instance
+''', "import_list": ["re"]}],
+
+# capture final segment
+["code_snippet", {"code":'''
+cols = (
+    'uri.path.8',
+    'uri.path.7',
+    'uri.path.6',
+    'uri.path.5',
+    'uri.path.4',
+    'uri.path.3',
+    'uri.path.2'
+)
+for col in cols:
+    if line.get(col):
+        page = line[col]
+        break
+if page:
+    line['v1.page'] = page
+''', "import_list": ["re"]}],
+
+
+#################
+# referer parse #
+#################
+
+["regex_extract", {"column": "referer", "output_columns": ["referer.gadget.name"], "regex": "^.*gadget=([^?&]*)"}],
+["regex_replace", {"column": "referer.gadget.name", "regex": "%2f", "repl_string": "-"}],
+
+["regex_extract", {"column": "referer", "output_columns": ["referer.navigationlevel"], "regex": "^.*feat-nav=([^?&]*)"}],
+
+["if_then_otherwise", {
+    "condition": ["regex_match", {"column": "referer", "pattern": "^.*\.mvc/.*"}],
+    "then": [["regex_extract", {"column": "referer", "output_columns": ["referer.page"], "regex": "^.*?([^/]*\.mvc/[^/?]*).*"}],
+        ["regex_replace", {"column": "referer.page", "regex": "/$", "repl_string": ""}]
+    ],
+    "otherwise": [["regex_extract", {"column": "referer", "output_columns": ["referer.page"], "regex": "^.*menu=([^?&]*)"}]]
+}],
+
+["regex_extract", {"column": "referer", "output_columns": ["referer.oid"], "regex": "^.*(?:%3[Aa]|Show/|Test/)(\d{5,10}).*"}],
+
+["regex_extract", {"column": "referer", "output_columns": ["referer.concept"], "regex": "^.*concept=([^?&]*)"}],
+
+["regex_extract", {"column": "referer", "output_columns": ["referer.report"], "regex": "^.*report=([^?&]*)"}],
+
+
+["url_parse", {"column": "referer", "default_scheme":"https"}],
+["flatten_dict", {"columns": ["referer"]}],
+
+["regex_extract", {"column": "referer.path", "output_columns": ["referer.instance", "referer.route"], "regex": "(?:^\/([^/]+)/(.*)|.*)"}],
+
+# dump
+
+["json_dump"]
+]
