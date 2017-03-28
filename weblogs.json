@@ -125,12 +125,11 @@ cols = (
     'uri.query.roomcontext',
     'uri.query.primaryscopecontext'
 )
+oid = None
 for col in cols:
     if line.get(col):
         oid = line[col]
         break
-    else:
-        oid = None
 if oid:
     line['v1.subject'] = '/'.join([line.get('uri.path.1'), oid])
     line['v1.assettype'] = re.search(r'^\w*', oid).group()
