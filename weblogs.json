@@ -18,8 +18,10 @@
 ["split_array", {"column": "uri_.path", "output_columns": ["uri_.path.0", "uri.path.1", "uri.path.2", "uri.path.3", "uri.path.4", "uri.path.5", "uri.path.6", "uri.path.7", "uri.path.8"] }],
 ["omit", {"columns": ["uri_.path", "uri_.path.0"]}],
 
-["url_query_string_parse", {"column": "uri_.query", "output_column": "uri.query", "keep_parameters": [
-
+["code_snippet", {"code":'''
+input_column = "uri_.query"
+output_column = "uri.query"
+keep_parameters = {
     # location indicators
     "concept",
     "entity",
@@ -71,7 +73,26 @@
     # misc
     "assetfacet",
     "feat-nav"
-]}],
+}
+output = {}
+qs = line.get(input_column)
+if qs and len(qs):
+    pairs = [s for s in qs.split('&')]
+    for name_value in pairs:
+        if not name_value:
+            continue
+        nv = name_value.split('=', 1)
+        if len(nv) != 2:
+            nv.append('')
+        name = urllib.parse.unquote_plus(nv[0])
+        if name in keep_parameters:
+            value = urllib.parse.unquote_plus(nv[1])
+            if name in output:
+                output[name].append(value)
+            else:
+                output[name] = [value]
+line[output_column] = output
+''', "import_list": ["urllib.parse"]}],
 ["flatten_dict", {"columns": ["uri.query"]}],
 ["omit", {"columns": ["uri_.query", "uri.query"]}],
 
