@@ -108,33 +108,29 @@ line[output_column] = output
 # coalesce  oids
 ["code_snippet", {"code":'''
 cols = (
-    'uri.query.asset',
     'uri.query.oid',
     'uri.query.oidtoken',
     'uri.query.id',
+    'uri.query.asset',
+    'uri.query.assetcontext',
     'uri.query.topic',
     'uri.query.stream',
     'uri.query.conversationoid',
     'uri.query.imageoid',
-    'uri.query.issueid',
-    'uri.query.program',
     'uri.query.room',
-    'uri.query.schedule',
-    'uri.query.selected',
-    'uri.query.teamroom',
-    'uri.query.assetcontext',
-    'uri.query.contextoid',
-    'uri.query.roomcontext',
-    'uri.query.primaryscopecontext'
+    'uri.query.selected'
 )
-oid = None
-for col in cols:
-    if line.get(col):
-        oid = line[col]
-        break
+oid = next((line[col] for col in cols if line.get(col)), None)
 if oid:
-    line['v1.subject'] = '/'.join([line.get('uri.path.1'), oid])
-    line['v1.assettype'] = re.search(r'^\w*', oid).group()
+    line['v1.oid'] = '/'.join([line.get('uri.path.1'), oid])
+''', "import_list": ["re"]}],
+
+# calculate assettype
+["code_snippet", {"code":'''
+if line.get('v1.oid'):
+    line['v1.assettype'] = re.search(r'^\w*', line['v1.oid']).group()
+elif line.get('uri.query.newtype'):
+    line['v1.assettype'] = line['uri.query.newtype']
 ''', "import_list": ["re"]}],
 
 # calculate action
