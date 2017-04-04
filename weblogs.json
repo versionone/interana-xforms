@@ -37,27 +37,28 @@ keep_parameters = {
     "rdreport",
 
     # oids
-    "asset",
-    "assetcontext",
-    "contextoid",
-    "conversationoid",
-    "imageoid",
-    "id",
     "oid",
     "oidtoken",
-    "issueid",
-    "primaryscopecontext",
-    "program",
-    "project",
-    "room",
-    "roomcontext",
-    "schedule",
-    "selected",
-    "stream",
-    "teamroom",
+    "id",
+    "asset",
+    "assetcontext",
     "topic",
+    "stream",
+    "conversationoid",
+    "imageoid",
+    "room",
+    "selected",
 
+    # context
+    "contextoid",
+    "primaryscopecontext",
+    "roomcontext",
+    
     # report parameters
+    "project",
+    "program",
+    "teamroom",
+    "schedule",
     "assettype",
     "aggregationtype",
     "duration",
@@ -71,6 +72,7 @@ keep_parameters = {
     "newtype",
 
     # misc
+    "issueid",
     "assetfacet",
     "feat-nav"
 }
