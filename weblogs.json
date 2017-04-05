@@ -105,6 +105,33 @@ line[output_column] = output
 ["regex_replace", {"column": "uri.query.path", "regex": "^/+", "repl_string": ""}],
 ["regex_replace", {"column": "uri.query.resolverkey", "regex": "^/+", "repl_string": ""}],
 
+# capture instance
+["code_snippet", {"code":'''
+instance = line.get('uri.path.1')
+if instance in ('s', 'favicon.ico', 'robots.txt', 'browserconfig.xml'):
+    instance = None
+if re.match('apple-touch-icon', instance):
+    instance = None
+if instance:
+    line['v1.instance'] = instance
+''', "import_list": ["re"]}],
+
+# capture final segment
+["code_snippet", {"code":'''
+cols = (
+    'uri.path.8',
+    'uri.path.7',
+    'uri.path.6',
+    'uri.path.5',
+    'uri.path.4',
+    'uri.path.3',
+    'uri.path.2'
+)
+page = next((line[col] for col in cols if line.get(col)), None)
+if page:
+    line['v1.page'] = page
+'''}],
+
 # coalesce  oids
 ["code_snippet", {"code":'''
 cols = (
@@ -166,33 +193,6 @@ if not action and line.get('uri.path.1') == 's':
     action = 's'
 if action:
     line['v1.action'] = action
-''', "import_list": ["re"]}],
-
-# capture instance
-["code_snippet", {"code":'''
-if not re.match(r's|faviocon\.ico|apple-touch-icon.*|robots\.txt|browserconfig\.xml', line.get('uri.path.1')):
-    instance = line.get('uri.path.1')
-if instance:
-    line['v1.instance'] = instance
-''', "import_list": ["re"]}],
-
-# capture final segment
-["code_snippet", {"code":'''
-cols = (
-    'uri.path.8',
-    'uri.path.7',
-    'uri.path.6',
-    'uri.path.5',
-    'uri.path.4',
-    'uri.path.3',
-    'uri.path.2'
-)
-for col in cols:
-    if line.get(col):
-        page = line[col]
-        break
-if page:
-    line['v1.page'] = page
 ''', "import_list": ["re"]}],
 
 
