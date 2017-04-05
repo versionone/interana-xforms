@@ -107,10 +107,10 @@ line[output_column] = output
 
 # capture instance
 ["code_snippet", {"code":'''
-instance = line.get('uri.path.1')
+instance = line.get('uri.path.1', '')
 if instance in ('s', 'favicon.ico', 'robots.txt', 'browserconfig.xml'):
     instance = None
-if re.match('apple-touch-icon', instance):
+elif re.match('apple-touch-icon', instance):
     instance = None
 if instance:
     line['v1.instance'] = instance
@@ -147,53 +147,77 @@ cols = (
     'uri.query.room',
     'uri.query.selected'
 )
+assettype = None
+assetid = None
 oid = next((line[col] for col in cols if line.get(col)), None)
 if oid:
-    line['v1.oid'] = '/'.join([line.get('uri.path.1'), oid])
-''', "import_list": ["re"]}],
-
-# calculate assettype
-["code_snippet", {"code":'''
-if line.get('v1.oid'):
-    line['v1.assettype'] = re.search(r'^\w*', line['v1.oid']).group()
+    m = re.match(r'(\w+):(\d+)', oid)
+    if m:
+        (assettype, assetid) = m.groups()
 elif line.get('uri.query.newtype'):
-    line['v1.assettype'] = line['uri.query.newtype']
+    assettype = line['uri.query.newtype']
+elif line.get('uri.path.2') == 'rest-1.v1':
+    assettype = line.get('uri.path.4')
+    assetid = line.get('uri.path.5')
+elif line.get('uri.path.2') == 'teamroom.mvc':
+    assettype = 'teamroom'
+    assetid = line.get('uri.path.4')
+if assettype:
+    line['v1.assettype'] = assettype
+if assetid:
+    line['v1.assetid'] = assetid
 ''', "import_list": ["re"]}],
 
-# calculate action
+# global asset
+["code_snippet", {"code":'''
+if line.get('v1.instance') and line.get('v1.assettype') and line.get('v1.assetid'):
+    line['v1.asset'] = line['v1.instance'] + '/' + line['v1.assettype'] + ':' + line['v1.assetid']
+'''}],
+["hash", {"column": "v1.asset"}],
+
+# calculate type.1
+["code_snippet", {"code":'''
+type1 = None
+if line.get('uri.path.1') == 's':
+    type1 = 's'
+else:
+    path2 = line.get('uri.path.2', '')
+    if path2 == 'api':
+        type1 = line.get('uri.path.3', '') + '/' + line.get('uri.path.4', '')
+    elif re.search(r'\.mvc$', path2):
+        type1 = path2 + '/' + line.get('uri.path.3', '')
+    elif re.search(r'\.(v1|img|aspx)$', path2):
+        type1 = path2
+if type1:
+    line['v1.type.1'] = type1
+''', "import_list": ["re"]}],
+
+# calculate type.2
 ["code_snippet", {"code":'''
 cols = (
-    'uri.query.concept',
+    'uri.query.menu',
+    'uri.query.page',
     'uri.query.gadgettype',
     'uri.query.gadget',
     'uri.query.gadgetpath',
-    'uri.query.menu',
-    'uri.query.page',
     'uri.query.entity',
     'uri.query.path',
+    'uri.query.concept',
     'uri.query.report',
     'uri.query.reportname',
     'uri.query.resolverkey',
     'uri.query.rdreport'
 )
-action = None
-for col in cols:
-    if col == 'uri.query.page' and line.get('uri.path.2') == 'rest-1.v1':
-        continue
-    if line.get(col):
-        action = line[col]
-        break
-if not action and re.match(r'\w+\.mvc', line.get('uri.path.2','')):
-    action = line.get('uri.path.2') + '/' + line.get('uri.path.3')
-if not action and re.match(r'\w+\.(v1|img|aspx)', line.get('uri.path.2','')):
-    action = line['uri.path.2']
-if not action and line.get('uri.path.2') == 'api':
-    action = line.get('uri.path.3') + '/' + line.get('uri.path.4')
-if not action and line.get('uri.path.1') == 's':
-    action = 's'
-if action:
-    line['v1.action'] = action
-''', "import_list": ["re"]}],
+type2 = None
+if line.get('uri.path.1') == 's':
+    type2 = line.get('uri.path.3')
+elif line.get('uri.path.2') == 'rest-1.v1':
+    type2 = line.get('uri.path.3')
+else:
+    type2 = next((line[col] for col in cols if line.get(col)), None)
+if type2:
+    line['v1.type.2'] = type2
+'''}],
 
 
 #################
