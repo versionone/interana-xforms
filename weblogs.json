@@ -90,9 +90,9 @@ if qs and len(qs):
         if name in keep_parameters:
             value = urllib.parse.unquote_plus(nv[1])
             if name in output:
-                output[name].append(value)
+                output[name] = output[name] + ',' + value
             else:
-                output[name] = [value]
+                output[name] = value
 line[output_column] = output
 ''', "import_list": ["urllib.parse"]}],
 ["flatten_dict", {"columns": ["uri.query"]}],
