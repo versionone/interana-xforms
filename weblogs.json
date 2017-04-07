@@ -198,15 +198,15 @@ else:
     path3 = line.get('uri.path.3', '')
     path4 = line.get('uri.path.4', '')
     if path2 == 'api':
-		if re.match(r'[a-z]\w*$', path4):
-			type1 = path3 + '/' + path4
-		else:
-			type1 = path3
+        if re.match(r'[a-z]\w*$', path4):
+            type1 = path3 + '/' + path4
+        else:
+            type1 = path3
     elif re.search(r'\.mvc$', path2):
-		if re.match(r'[a-z]\w*$', path3):
-			type1 = path2 + '/' + path3
-		else:
-			type1 = path2
+        if re.match(r'[a-z]\w*$', path3):
+            type1 = path2 + '/' + path3
+        else:
+            type1 = path2
     elif re.search(r'\.(v1|img|aspx)$', path2):
         type1 = path2
 if type1:
@@ -237,8 +237,8 @@ elif re.match(r'rest-1(\.oauth)?\.v1$', line.get('uri.path.2', '')):
 else:
     type2 = next((line[col] for col in cols if line.get(col)), None)
 if type2:
-    line['v1.type.2'] = type2
-'''}],
+    line['v1.type.2'] = re.sub(r'\d+$', '...', type2)
+''', "import_list": ["re"]}],
 
 
 #################
