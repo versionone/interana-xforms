@@ -160,7 +160,7 @@ else:
     path4 = line.get('uri.path.4', '')
     if line.get('uri.query.newtype'):
         assettype = line['uri.query.newtype']
-    elif re.match('rest-1(\.oauth)?\.v1$', path2):
+    elif re.match(r'rest-1(\.oauth)?\.v1$', path2):
         assettype = path4
         assetid = line.get('uri.path.5')
     elif path2 == 'teamroom.mvc':
@@ -232,7 +232,7 @@ cols = (
 type2 = None
 if line.get('uri.path.1') == 's':
     type2 = line.get('uri.path.3')
-elif re.match('rest-1(\.oauth)?\.v1$', line.get('uri.path.2', '')):
+elif re.match(r'rest-1(\.oauth)?\.v1$', line.get('uri.path.2', '')):
     type2 = line.get('uri.path.3')
 else:
     type2 = next((line[col] for col in cols if line.get(col)), None)
