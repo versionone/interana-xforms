@@ -166,6 +166,15 @@ else:
     elif path2 == 'teamroom.mvc':
         assettype = 'teamroom'
         assetid = path4
+    elif re.match(r'attachment(\.oauth)?\.(v1|img)$', path2:
+        assettype = 'attachment'
+        assetid = path3
+    elif re.match(r'image(\.oauth)?\.(v1|img)$', path2:
+        assettype = 'image'
+        assetid = path3
+    elif re.match(r'embedded(\.oauth)?\.(v1|img)$', path2:
+        assettype = 'embeddedimage'
+        assetid = path3
 if assettype:
     line['v1.assettype'] = assettype
 if assetid:
