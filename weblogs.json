@@ -48,9 +48,9 @@ keep_parameters = {
     "imageoid",
     "room",
     "selected",
+    "contextoid",
 
     # context
-    "contextoid",
     "primaryscopecontext",
     "roomcontext",
     
@@ -144,7 +144,8 @@ cols = (
     'uri.query.conversationoid',
     'uri.query.imageoid',
     'uri.query.room',
-    'uri.query.selected'
+    'uri.query.selected',
+    'uri.query.contextoid'
 )
 assettype = None
 assetid = None
@@ -180,12 +181,38 @@ if assetid:
     line['v1.assetid'] = assetid
 ''', "import_list": ["re"]}],
 
-# global asset
+# globally unique asset
 ["code_snippet", {"code":'''
 if line.get('v1.instance') and line.get('v1.assettype') and line.get('v1.assetid'):
     line['v1.asset'] = line['v1.instance'] + '/' + line['v1.assettype'] + ':' + line['v1.assetid']
 '''}],
 ["hash", {"column": "v1.asset"}],
+
+# coalesce  context
+["code_snippet", {"code":'''
+cols = (
+    'uri.query.primaryscopecontext',
+    'uri.query.roomcontext'
+)
+contexttype = None
+contextid = None
+oid = next((line[col] for col in cols if line.get(col)), None)
+if oid:
+    m = re.match(r'(\w+):(\d+)', oid)
+    if m:
+        (contexttype, contextid) = m.groups()
+if contexttype:
+    line['v1.contexttype'] = contexttype
+if contextid:
+    line['v1.contextid'] = contextid
+''', "import_list": ["re"]}],
+
+# globally unique context
+["code_snippet", {"code":'''
+if line.get('v1.instance') and line.get('v1.contexttype') and line.get('v1.contextid'):
+    line['v1.context'] = line['v1.instance'] + '/' + line['v1.contexttype'] + ':' + line['v1.contextid']
+'''}],
+["hash", {"column": "v1.context"}],
 
 # calculate type.1
 ["code_snippet", {"code":'''
