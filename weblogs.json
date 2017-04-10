@@ -72,7 +72,6 @@ keep_parameters = {
     "newtype",
 
     # misc
-    "issueid",
     "assetfacet",
     "feat-nav"
 }
