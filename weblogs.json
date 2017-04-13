@@ -178,7 +178,7 @@ else:
         assetid = path3
 if assettype:
     line['v1.assettype'] = assettype
-if assetid:
+if assetid and re.match(r'\d+$', str(assetid)):
     line['v1.assetid'] = assetid
 ''', "import_list": ["re"]}],
 
