@@ -19,6 +19,7 @@
 ["omit", {"columns": ["uri_.path", "uri_.path.0"]}],
 
 ["code_snippet", {"code":'''
+import urllib.parse
 input_column = "uri_.query"
 output_column = "uri.query"
 keep_parameters = {
@@ -53,7 +54,7 @@ keep_parameters = {
     # context
     "primaryscopecontext",
     "roomcontext",
-    
+
     # report parameters
     "project",
     "program",
@@ -166,13 +167,13 @@ else:
     elif path2 == 'teamroom.mvc':
         assettype = 'teamroom'
         assetid = path4
-    elif re.match(r'attachment(\.oauth)?\.(v1|img)$', path2:
+    elif re.match(r'attachment(\.oauth)?\.(v1|img)$', path2):
         assettype = 'attachment'
         assetid = path3
-    elif re.match(r'image(\.oauth)?\.(v1|img)$', path2:
+    elif re.match(r'image(\.oauth)?\.(v1|img)$', path2):
         assettype = 'image'
         assetid = path3
-    elif re.match(r'embedded(\.oauth)?\.(v1|img)$', path2:
+    elif re.match(r'embedded(\.oauth)?\.(v1|img)$', path2):
         assettype = 'embeddedimage'
         assetid = path3
 if assettype:
@@ -281,6 +282,7 @@ if view2:
 ["omit", {"columns": ["referer.path", "referer.path.0"]}],
 
 ["code_snippet", {"code":'''
+import urllib.parse
 input_column = "referer.query"
 output_column = "referer.query"
 keep_parameters = {
@@ -341,16 +343,16 @@ else:
     path3 = line.get('referer.path.3', '')
     path4 = line.get('referer.path.4', '')
     if path2 == 'api':
-        if re.match(r'[a-z]\w*$', path4):
+        if re.match(r'[a-z]\w*$', str(path4)):
             from1 = path3 + '/' + path4
         else:
             from1 = path3
-    elif re.search(r'\.mvc$', path2):
-        if re.match(r'[a-z]\w*$', path3):
+    elif re.search(r'\.mvc$', str(path2)):
+        if re.match(r'[a-z]\w*$', str(path3)):
             from1 = path2 + '/' + path3
         else:
             from1 = path2
-    elif re.search(r'\.(v1|img|aspx)$', path2):
+    elif re.search(r'\.(v1|img|aspx)$', str(path2)):
         from1 = path2
 
 cols = (
