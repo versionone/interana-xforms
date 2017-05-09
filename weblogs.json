@@ -129,7 +129,7 @@ cols = (
 )
 page = next((line[col] for col in cols if line.get(col)), None)
 if page:
-    line['v1.page'] = page
+    line['uri.page'] = page
 '''}],
 
 # coalesce  oids
