@@ -108,9 +108,7 @@ line[output_column] = output
 # capture instance
 ["code_snippet", {"code":'''
 instance = line.get('uri.path.1', '')
-if instance in ('s', 'favicon.ico', 'robots.txt', 'browserconfig.xml'):
-    instance = None
-elif re.match('apple-touch-icon', instance):
+if instance == 's' or '.' in instance:
     instance = None
 if instance:
     line['v1.instance'] = instance
