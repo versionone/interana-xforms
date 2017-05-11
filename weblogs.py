@@ -107,11 +107,15 @@ line[output_column] = output
 
 # capture instance
 ["code_snippet", {"code":'''
-instance = line.get('uri.path.1', '')
-if instance == 's' or '.' in instance:
-    instance = None
-if instance:
-    line['v1.instance'] = instance
+path1 = line.get('uri.path.1', '')
+path2 = line.get('uri.path.2')
+status = int(line['status'])
+if (
+        path1 != 's' and
+        not re.search(r'[^a-zA-Z0-9_-]', instance) and
+        (path2 or status < 400)
+   ):
+    line['v1.instance'] = path1
 ''', "import_list": ["re"]}],
 
 # capture final segment
