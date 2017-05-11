@@ -74,6 +74,8 @@ keep_parameters = {
 
     # misc
     "assetfacet",
+    "aspage",
+    "norender",
     "feat-nav"
 }
 output = {}
