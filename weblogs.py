@@ -137,15 +137,21 @@ line['referer.query'] = parse_querystring(line.get('referer.query'), referer_kee
 
 # capture instance
 ["code_snippet", {"code":'''
+instance = None
 path1 = line.get('uri.path.1', '')
 path2 = line.get('uri.path.2')
 status = int(line['status'])
 if (
-        path1 != 's' and
-        not re.search(r'[^a-zA-Z0-9_-]', instance) and
+        path1 != 's' and re.match(r'[a-zA-Z0-9_-]+$', path1) and
         (path2 or status < 400)
    ):
-    line['v1.instance'] = path1
+    instance = path1
+else:
+    path1 = line.get('referer.path.1', '')
+    if path1 != 's' and re.match(r'[a-zA-Z0-9_-]+$', path1):
+        instance = path1
+if instance:
+    line['v1.instance'] = instance
 ''', "import_list": ["re"]}],
 
 # capture final segment
