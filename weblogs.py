@@ -12,11 +12,9 @@
 ["lowercase_value", {"column": "uri_"}],
 ["url_parse", {"column": "uri_"}],
 ["flatten_dict", {"columns": ["uri_"]}],
-["omit", {"columns": ["uri_", "uri_.scheme", "uri_.params", "uri_.hostname", "uri_.port", "uri_.fragment"]}],
 
 ["convert_to_array", {"column": "uri_.path", "separator": "/"}],
 ["split_array", {"column": "uri_.path", "output_columns": ["uri_.path.0", "uri.path.1", "uri.path.2", "uri.path.3", "uri.path.4", "uri.path.5", "uri.path.6", "uri.path.7", "uri.path.8"] }],
-["omit", {"columns": ["uri_.path", "uri_.path.0"]}],
 
 ["code_snippet", {"code":'''
 import urllib.parse
@@ -98,7 +96,6 @@ if qs and len(qs):
 line[output_column] = output
 ''', "import_list": ["urllib.parse"]}],
 ["flatten_dict", {"columns": ["uri.query"]}],
-["omit", {"columns": ["uri_.query", "uri.query"]}],
 
 # trim leading slashes
 ["regex_replace", {"column": "uri.query.gadget", "regex": "^/+", "repl_string": ""}],
@@ -279,11 +276,9 @@ if view2:
 ["lowercase_value", {"column": "referer"}],
 ["url_parse", {"column": "referer"}],
 ["flatten_dict", {"columns": ["referer"]}],
-["omit", {"columns": ["referer.params", "referer.fragment"]}],
 
 ["convert_to_array", {"column": "referer.path", "separator": "/"}],
 ["split_array", {"column": "referer.path", "output_columns": ["referer.path.0", "referer.path.1", "referer.path.2", "referer.path.3", "referer.path.4", "referer.path.5", "referer.path.6", "referer.path.7", "referer.path.8"] }],
-["omit", {"columns": ["referer.path", "referer.path.0"]}],
 
 ["code_snippet", {"code":'''
 import urllib.parse
@@ -328,7 +323,6 @@ if qs and len(qs):
 line[output_column] = output
 ''', "import_list": ["urllib.parse"]}],
 ["flatten_dict", {"columns": ["referer.query"]}],
-["omit", {"columns": ["referer.query"]}],
 
 # trim leading slashes
 ["regex_replace", {"column": "referer.query.gadget", "regex": "^/+", "repl_string": ""}],
@@ -380,6 +374,13 @@ if from1 or from2:
 
 
 # dump
+
+["omit", {"columns": ["uri_", "uri_.scheme", "uri_.params", "uri_.hostname", "uri_.port", "uri_.fragment",
+    "uri_.path", "uri_.path.0",
+    "uri_.query", "uri.query",
+    "referer.params", "referer.fragment",
+    "referer.path", "referer.path.0",
+    "referer.query"]}],
 
 ["json_dump"]
 ]
