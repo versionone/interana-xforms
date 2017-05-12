@@ -23,84 +23,105 @@
 
 ["code_snippet", {"code":'''
 import urllib.parse
-input_column = "uri_.query"
-output_column = "uri.query"
-keep_parameters = {
+uri_keep_parameters = {
     # location indicators
-    "concept",
-    "entity",
-    "gadgettype",
-    "gadget",
-    "gadgetpath",
-    "menu",
-    "page",
-    "path",
-    "report",
-    "reportname",
-    "resolverkey",
-    "rdreport",
+    'concept',
+    'entity',
+    'gadgettype',
+    'gadget',
+    'gadgetpath',
+    'menu',
+    'page',
+    'path',
+    'report',
+    'reportname',
+    'resolverkey',
+    'rdreport',
 
     # oids
-    "oid",
-    "oidtoken",
-    "id",
-    "asset",
-    "assetcontext",
-    "topic",
-    "stream",
-    "conversationoid",
-    "imageoid",
-    "room",
-    "selected",
-    "contextoid",
+    'oid',
+    'oidtoken',
+    'id',
+    'asset',
+    'assetcontext',
+    'topic',
+    'stream',
+    'conversationoid',
+    'imageoid',
+    'room',
+    'selected',
+    'contextoid',
 
     # context
-    "primaryscopecontext",
-    "roomcontext",
+    'primaryscopecontext',
+    'roomcontext',
 
     # report parameters
-    "project",
-    "program",
-    "teamroom",
-    "schedule",
-    "assettype",
-    "aggregationtype",
-    "duration",
-    "interval",
-    "isbycount",
-    "period",
-    "showweekends",
+    'project',
+    'program',
+    'teamroom',
+    'schedule',
+    'assettype',
+    'aggregationtype',
+    'duration',
+    'interval',
+    'isbycount',
+    'period',
+    'showweekends',
 
     # detail widget parameters
-    "mode",
-    "newtype",
+    'mode',
+    'newtype',
 
     # misc
-    "assetfacet",
-    "aspage",
-    "norender",
-    "feat-nav"
+    'assetfacet',
+    'aspage',
+    'norender',
+    'feat-nav'
 }
-output = {}
-qs = line.get(input_column)
-if qs and len(qs):
-    pairs = [s for s in qs.split('&')]
-    for name_value in pairs:
-        if not name_value:
-            continue
-        nv = name_value.split('=', 1)
-        if len(nv) != 2:
-            nv.append('')
-        name = urllib.parse.unquote_plus(nv[0])
-        if name in keep_parameters:
-            value = urllib.parse.unquote_plus(nv[1])
-            if name in output:
-                output[name] = output[name] + ',' + value
-            else:
-                output[name] = value
-line[output_column] = output
+referer_keep_parameters = {
+    # location indicators
+    'concept',
+    'entity',
+    'gadgettype',
+    'gadget',
+    'gadgetpath',
+    'menu',
+    'page',
+    'path',
+    'report',
+    'reportname',
+    'resolverkey',
+    'rdreport',
+
+    # misc
+    'assetfacet',
+    'feat-nav'
+}
+
+def parse_querystring(qs, keep_parameters):
+    output = {}
+    if qs and len(qs):
+        pairs = [s for s in qs.split('&')]
+        for name_value in pairs:
+            if not name_value:
+                continue
+            nv = name_value.split('=', 1)
+            if len(nv) != 2:
+                nv.append('')
+            name = urllib.parse.unquote_plus(nv[0])
+            if name in keep_parameters:
+                value = urllib.parse.unquote_plus(nv[1])
+                if name in output:
+                    output[name] = output[name] + ',' + value
+                else:
+                    output[name] = value
+    return output
+
+line['uri.query'] = parse_querystring(line.get('uri_.query'), uri_keep_parameters)
+line['referer.query'] = parse_querystring(line.get('referer.query'), referer_keep_parameters)
 ''', "import_list": ["urllib.parse"]}],
-["flatten_dict", {"columns": ["uri.query"]}],
+["flatten_dict", {"columns": ["uri.query", "referer.query"]}],
 
 # trim leading slashes
 ["regex_replace", {"column": "uri.query.gadget", "regex": "^/+", "repl_string": ""}],
@@ -108,6 +129,11 @@ line[output_column] = output
 ["regex_replace", {"column": "uri.query.page", "regex": "^/+", "repl_string": ""}],
 ["regex_replace", {"column": "uri.query.path", "regex": "^/+", "repl_string": ""}],
 ["regex_replace", {"column": "uri.query.resolverkey", "regex": "^/+", "repl_string": ""}],
+["regex_replace", {"column": "referer.query.gadget", "regex": "^/+", "repl_string": ""}],
+["regex_replace", {"column": "referer.query.gadgetpath", "regex": "^/+", "repl_string": ""}],
+["regex_replace", {"column": "referer.query.page", "regex": "^/+", "repl_string": ""}],
+["regex_replace", {"column": "referer.query.path", "regex": "^/+", "repl_string": ""}],
+["regex_replace", {"column": "referer.query.resolverkey", "regex": "^/+", "repl_string": ""}],
 
 # capture instance
 ["code_snippet", {"code":'''
@@ -272,62 +298,6 @@ else:
 if view2:
     line['v1.view.2'] = re.sub(r'\d+$', '...', view2)
 ''', "import_list": ["re"]}],
-
-
-#################
-# referer parse #
-#################
-
-["code_snippet", {"code":'''
-import urllib.parse
-input_column = "referer.query"
-output_column = "referer.query"
-keep_parameters = {
-    # location indicators
-    "concept",
-    "entity",
-    "gadgettype",
-    "gadget",
-    "gadgetpath",
-    "menu",
-    "page",
-    "path",
-    "report",
-    "reportname",
-    "resolverkey",
-    "rdreport",
-
-    # misc
-    "assetfacet",
-    "feat-nav"
-}
-output = {}
-qs = line.get(input_column)
-if qs and len(qs):
-    pairs = [s for s in qs.split('&')]
-    for name_value in pairs:
-        if not name_value:
-            continue
-        nv = name_value.split('=', 1)
-        if len(nv) != 2:
-            nv.append('')
-        name = urllib.parse.unquote_plus(nv[0])
-        if name in keep_parameters:
-            value = urllib.parse.unquote_plus(nv[1])
-            if name in output:
-                output[name] = output[name] + ',' + value
-            else:
-                output[name] = value
-line[output_column] = output
-''', "import_list": ["urllib.parse"]}],
-["flatten_dict", {"columns": ["referer.query"]}],
-
-# trim leading slashes
-["regex_replace", {"column": "referer.query.gadget", "regex": "^/+", "repl_string": ""}],
-["regex_replace", {"column": "referer.query.gadgetpath", "regex": "^/+", "repl_string": ""}],
-["regex_replace", {"column": "referer.query.page", "regex": "^/+", "repl_string": ""}],
-["regex_replace", {"column": "referer.query.path", "regex": "^/+", "repl_string": ""}],
-["regex_replace", {"column": "referer.query.resolverkey", "regex": "^/+", "repl_string": ""}],
 
 # calculate v1.from
 ["code_snippet", {"code":'''
