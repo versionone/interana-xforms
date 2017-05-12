@@ -5,16 +5,21 @@
 ["add_filename", {"column": "filename"}],
 
 #############
-# uri parse #
+# uri and referer parse
 #############
 
 ["join", {"columns": ["cs-host", "uri"], "output_column": "uri_"}],
 ["lowercase_value", {"column": "uri_"}],
 ["url_parse", {"column": "uri_"}],
 ["flatten_dict", {"columns": ["uri_"]}],
-
 ["convert_to_array", {"column": "uri_.path", "separator": "/"}],
 ["split_array", {"column": "uri_.path", "output_columns": ["uri_.path.0", "uri.path.1", "uri.path.2", "uri.path.3", "uri.path.4", "uri.path.5", "uri.path.6", "uri.path.7", "uri.path.8"] }],
+
+["lowercase_value", {"column": "referer"}],
+["url_parse", {"column": "referer"}],
+["flatten_dict", {"columns": ["referer"]}],
+["convert_to_array", {"column": "referer.path", "separator": "/"}],
+["split_array", {"column": "referer.path", "output_columns": ["referer.path.0", "referer.path.1", "referer.path.2", "referer.path.3", "referer.path.4", "referer.path.5", "referer.path.6", "referer.path.7", "referer.path.8"] }],
 
 ["code_snippet", {"code":'''
 import urllib.parse
@@ -272,13 +277,6 @@ if view2:
 #################
 # referer parse #
 #################
-
-["lowercase_value", {"column": "referer"}],
-["url_parse", {"column": "referer"}],
-["flatten_dict", {"columns": ["referer"]}],
-
-["convert_to_array", {"column": "referer.path", "separator": "/"}],
-["split_array", {"column": "referer.path", "output_columns": ["referer.path.0", "referer.path.1", "referer.path.2", "referer.path.3", "referer.path.4", "referer.path.5", "referer.path.6", "referer.path.7", "referer.path.8"] }],
 
 ["code_snippet", {"code":'''
 import urllib.parse
