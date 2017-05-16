@@ -14,12 +14,24 @@
 ["flatten_dict", {"columns": ["uri_"]}],
 ["convert_to_array", {"column": "uri_.path", "separator": "/"}],
 ["split_array", {"column": "uri_.path", "output_columns": ["uri_.path.0", "uri.path.1", "uri.path.2", "uri.path.3", "uri.path.4", "uri.path.5", "uri.path.6", "uri.path.7", "uri.path.8"] }],
+["code_snippet", {"code":'''
+getPath = lambda n: line.get('uri.path.' + str(n))
+page = next((path for path in map(getPath, range(8, 1, -1)) if path), None)
+if page:
+    line['uri.page'] = page
+'''}],
 
 ["lowercase_value", {"column": "referer"}],
 ["url_parse", {"column": "referer"}],
 ["flatten_dict", {"columns": ["referer"]}],
 ["convert_to_array", {"column": "referer.path", "separator": "/"}],
 ["split_array", {"column": "referer.path", "output_columns": ["referer.path.0", "referer.path.1", "referer.path.2", "referer.path.3", "referer.path.4", "referer.path.5", "referer.path.6", "referer.path.7", "referer.path.8"] }],
+["code_snippet", {"code":'''
+getPath = lambda n: line.get('referer.path.' + str(n))
+page = next((path for path in map(getPath, range(8, 1, -1)) if path), None)
+if page:
+    line['referer.page'] = page
+'''}],
 
 ["code_snippet", {"code":'''
 import urllib.parse
@@ -153,22 +165,6 @@ else:
 if instance:
     line['v1.instance'] = instance
 ''', "import_list": ["re"]}],
-
-# capture final segment
-["code_snippet", {"code":'''
-cols = (
-    'uri.path.8',
-    'uri.path.7',
-    'uri.path.6',
-    'uri.path.5',
-    'uri.path.4',
-    'uri.path.3',
-    'uri.path.2'
-)
-page = next((line[col] for col in cols if line.get(col)), None)
-if page:
-    line['uri.page'] = page
-'''}],
 
 # coalesce  oids
 ["code_snippet", {"code":'''
