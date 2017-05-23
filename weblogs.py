@@ -184,7 +184,9 @@ cols = (
 )
 assettype = None
 assetid = None
-oid = next((line[col] for col in cols if line.get(col)), None)
+oid = next(iter(filter(None, map(line.get, cols))), None)
+if not oid and line.get('uri.path.2') == 'api' and line.get('uri.path.3') == 'activitystream':
+    oid = line.get('uri.path.4')
 if oid:
     m = re.match(r'(\w+):(\d+)', oid)
     if m:
