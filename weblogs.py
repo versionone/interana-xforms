@@ -338,6 +338,81 @@ if from1 or from2:
     line['v1.from'] = (from1 or '-') + ':' + (from2 or '-')
 ''', "import_list": ["re"]}],
 
+# target.type and target
+["code_snippet", {"code":'''
+targettype = None
+target = None
+v1version = None
+
+nn = lambda value: value and re.sub(r'[0-9a-f][0-9a-f-]*$', r'#', value)
+ah = lambda value: value and re.sub(r'^(ahreport|ahpreview).*$', r'\1#', value)
+s = lambda *values: '/'.join(filter(None, values))
+f = lambda name: line.get(name)
+
+path1 = f('uri.path.1')
+path2 = f('uri.path.2')
+path3 = f('uri.path.3')
+
+if path1 == 's':
+    targettype = 'static'
+    target = f('uri.page')
+    v1version = path2
+
+elif path2 == 'default.aspx':
+    page = f('uri.query.page')
+    menu = f('uri.query.menu')
+    targettype = (page and 'popup') or (menu and 'main')
+    target = page or menu
+
+elif path2 == 'ui.v1':
+    gadgettype = f('uri.query.gadgettype')
+    gadget = f('uri.query.gadget')
+    targettype = 'gadget'
+    target = gadgettype or gadget
+
+elif path2 == 'gadgetview.mvc' and path3 == 'rendergadget':
+    targettype = 'gadget'
+    target = f('uri.query.gadgetpath')
+
+elif path2 == 'entity.v1':
+    targettype = 'entity'
+    target = nn(f('uri.query.entity'))
+
+elif path2 == 'export.v1':
+    targettype = 'export'
+    target = f('uri.query.path')
+
+elif path2 == 'analyticsintegration.mvc':
+    targettype = 'analytics'
+    target = s(path3, ah(f('uri.query.rdreport')))
+
+elif path2 == 'report.mvc' or (path2 == 'api' and path3 and re.match(r'report', path3)):
+    targettype = 'reports'
+    target = s(path3, f('uri.path.4'), nn(f('uri.query.report')) or nn(f('uri.query.reportname')))
+
+elif path2 == 'api':
+    targettype = 'webapi'
+    target = s(path2, path3)
+
+elif path2 and re.search(r'\.mvc$', path2):
+    targettype = 'mvc'
+    target = s(path2, nn(path3))
+
+elif path2 and re.match(r'(rest-1|meta|query)(\.oauth|\.legacy)?\.v1', path2):
+    targettype = 'api'
+    target = path2[:path2.index('.')]
+
+elif path2 and re.search(r'\.(v1|img|aspx|html)$', path2):
+    targettype = 'other'
+    target = path2
+
+if targettype:
+    line['v1.target.type'] = targettype
+if target:
+    line['v1.target'] = target
+if v1version:
+    line['v1.version'] = v1version
+''', "import_list": ["re"]}],
 
 # dump
 
