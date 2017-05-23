@@ -15,10 +15,7 @@
 ["convert_to_array", {"column": "uri_.path", "separator": "/"}],
 ["split_array", {"column": "uri_.path", "output_columns": ["uri_.path.0", "uri.path.1", "uri.path.2", "uri.path.3", "uri.path.4", "uri.path.5", "uri.path.6", "uri.path.7", "uri.path.8"] }],
 ["code_snippet", {"code":'''
-getPath = lambda n: line.get('uri.path.' + str(n))
-page = next((path for path in map(getPath, range(8, 1, -1)) if path), None)
-if page:
-    line['uri.page'] = page
+line['uri.page'] = next(iter(filter(None, map(line.get, map(lambda n: 'uri.path.' + str(n), range(8, 1, -1))))), None)
 '''}],
 
 ["lowercase_value", {"column": "referer"}],
@@ -27,10 +24,7 @@ if page:
 ["convert_to_array", {"column": "referer.path", "separator": "/"}],
 ["split_array", {"column": "referer.path", "output_columns": ["referer.path.0", "referer.path.1", "referer.path.2", "referer.path.3", "referer.path.4", "referer.path.5", "referer.path.6", "referer.path.7", "referer.path.8"] }],
 ["code_snippet", {"code":'''
-getPath = lambda n: line.get('referer.path.' + str(n))
-page = next((path for path in map(getPath, range(8, 1, -1)) if path), None)
-if page:
-    line['referer.page'] = page
+line['referer.page'] = next(iter(filter(None, map(line.get, map(lambda n: 'uri.path.' + str(n), range(8, 1, -1))))), None)
 '''}],
 
 ["code_snippet", {"code":'''
@@ -233,7 +227,7 @@ cols = (
 )
 contexttype = None
 contextid = None
-oid = next((line[col] for col in cols if line.get(col)), None)
+oid = next(iter(filter(None, map(line.get, cols))), None)
 if oid:
     m = re.match(r'(\w+):(\d+)', oid)
     if m:
@@ -298,7 +292,7 @@ if line.get('uri.path.1') == 's':
 elif re.match(r'rest-1(\.oauth)?\.v1$', line.get('uri.path.2', '')):
     view2 = line.get('uri.path.3')
 else:
-    view2 = next((line[col] for col in cols if line.get(col)), None)
+    view2 = next(iter(filter(None, map(line.get, cols))), None)
 if view2:
     line['v1.view.2'] = re.sub(r'\d+$', '...', view2)
 ''', "import_list": ["re"]}],
@@ -339,7 +333,7 @@ cols = (
     'referer.query.resolverkey',
     'referer.query.rdreport'
 )
-from2 = next((line[col] for col in cols if line.get(col)), None)
+from2 = next(iter(filter(None, map(line.get, cols))), None)
 if from1 or from2:
     line['v1.from'] = (from1 or '-') + ':' + (from2 or '-')
 ''', "import_list": ["re"]}],
