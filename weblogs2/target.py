@@ -13,7 +13,7 @@ find = lambda values, predicate: next((i for i, value in enumerate(values) if pr
 first = lambda values: next((value for value in values if value != None), None)
 
 # target parsed from 'uri'
-path = filter(None, map(f, map(lambda n: 'uri.path.' + str(n), range(1, 9))))
+path = list(filter(None, map(f, map(lambda n: 'uri.path.' + str(n), range(1, 9)))))
 route = path[1:]
 at = first(find(route, match(pattern)) for pattern in (r'\.v1$', r'\.img$'))
 if at:
@@ -67,7 +67,7 @@ else:
     target = route[0]
 
 # source parsed from 'referer'
-path = filter(None, map(f, map(lambda n: 'referer.path.' + str(n), range(1, 9))))
+path = list(filter(None, map(f, map(lambda n: 'referer.path.' + str(n), range(1, 9)))))
 route = path[1:]
 at = first(find(route, match(pattern)) for pattern in (r'\.v1$', r'\.img$'))
 if at:
