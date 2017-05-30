@@ -346,7 +346,8 @@ sourcetype = None
 source = None
 v1version = None
 
-nn = lambda value: value and re.sub(r'[0-9a-f][0-9a-f-]*$', r'#', value)
+nn = lambda value: value and re.sub(r'\d+$', r'#', value)
+xx = lambda value: value and re.sub(r'(?<![a-z0-9])([0-9a-f]{2}-?)+$', r'#', value)
 ah = lambda value: value and re.sub(r'^(ahreport|ahpreview).*$', r'\1#', value)
 s = lambda values: '/'.join(filter(None, values)) or None
 f = lambda name: line.get(name)
@@ -377,7 +378,7 @@ elif route[0] == 'ui.v1':
     target = f('uri.query.gadgettype') or f('uri.query.gadget') or 'none'
 elif route[0] == 'entity.v1':
     targettype = 'entity'
-    target = nn(f('uri.query.entity')) or 'none'
+    target = xx(f('uri.query.entity')) or 'none'
 elif route[0] == 'export.v1':
     targettype = 'export'
     target = f('uri.query.path')
@@ -390,6 +391,9 @@ elif route[0] == 'analyticsintegration.mvc':
 elif route[0] == 'report.mvc':
     targettype = 'report'
     target = s(route[1:2] + [nn(f('uri.query.report'))])
+elif route[0] == 'published.mvc':
+    targettype = 'mvc'
+    target = xx(s(route[0:2]))
 elif re.search(r'\.mvc$', route[0]):
     targettype = 'mvc'
     target = nn(s(route[0:2]))
@@ -430,7 +434,7 @@ elif route[0] == 'ui.v1':
     source = f('referer.query.gadgettype') or f('referer.query.gadget') or 'none'
 elif route[0] == 'entity.v1':
     sourcetype = 'entity'
-    source = nn(f('referer.query.entity')) or 'none'
+    source = xx(f('referer.query.entity')) or 'none'
 elif route[0] == 'export.v1':
     sourcetype = 'export'
     source = f('referer.query.path')
@@ -443,6 +447,9 @@ elif route[0] == 'analyticsintegration.mvc':
 elif route[0] == 'report.mvc':
     sourcetype = 'report'
     source = s(route[1:2] + [nn(f('referer.query.report'))])
+elif route[0] == 'published.mvc':
+    sourcetype = 'mvc'
+    source = xx(s(route[0:2]))
 elif re.search(r'\.mvc$', route[0]):
     sourcetype = 'mvc'
     source = nn(s(route[0:2]))
