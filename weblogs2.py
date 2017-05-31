@@ -340,8 +340,10 @@ if from1 or from2:
 
 # target and source
 ["code_snippet", {"code":'''
+targethost = line.get('_uri.hostname')
 targettype = None
 target = None
+sourcehost = line.get('referer.hostname')
 sourcetype = None
 source = None
 v1version = None
@@ -413,60 +415,61 @@ else:
     target = route[0]
 
 # source parsed from 'referer'
-path = list(filter(None, map(f, map(lambda n: 'referer.path.' + str(n), range(1, 9)))))
-route = path[1:]
-at = first(find(route, match(pattern)) for pattern in (r'\.v1$', r'\.img$'))
-if at:
-    route = route[at:]
+if sourcehost == targethost:
+    path = list(filter(None, map(f, map(lambda n: 'referer.path.' + str(n), range(1, 9)))))
+    route = path[1:]
+    at = first(find(route, match(pattern)) for pattern in (r'\.v1$', r'\.img$'))
+    if at:
+        route = route[at:]
 
-if not path or not re.match(r'[a-z0-9_-]+$', path[0]):
-    sourcetype = 'root'
-elif path[0] == 's':
-    sourcetype = 'static'
-    source = s(path[2:3])
-elif not route:
-    sourcetype = 'other'
-elif re.match(r'(rest-1|meta|query)(\.oauth|\.legacy)?\.v1', route[0]):
-    sourcetype = 'api'
-    source = route[0][:route[0].index('.')]
-elif route[0] == 'ui.v1':
-    sourcetype = 'gadget'
-    source = f('referer.query.gadgettype') or f('referer.query.gadget') or 'none'
-elif route[0] == 'entity.v1':
-    sourcetype = 'entity'
-    source = xx(f('referer.query.entity')) or 'none'
-elif route[0] == 'export.v1':
-    sourcetype = 'export'
-    source = f('referer.query.path')
-elif route[0:2] == ['gadgetview.mvc', 'rendergadget']:
-    sourcetype = 'gadget'
-    source = f('referer.query.gadgetpath')
-elif route[0] == 'analyticsintegration.mvc':
-    sourcetype = 'analytics'
-    source = s(route[1:2] + [ah(f('referer.query.rdreport'))])
-elif route[0] == 'report.mvc':
-    sourcetype = 'report'
-    source = s(route[1:2] + [nn(f('referer.query.report'))])
-elif route[0] == 'published.mvc':
-    sourcetype = 'mvc'
-    source = xx(s(route[0:2]))
-elif re.search(r'\.mvc$', route[0]):
-    sourcetype = 'mvc'
-    source = nn(s(route[0:2]))
-elif route[0] == 'api' and route[1] and re.match(r'report', route[1]):
-    sourcetype = 'report'
-    source = s(route[1:3] + [nn(f('referer.query.report')) or nn(f('referer.query.reportname'))])
-elif route[0] == 'api':
-    sourcetype = 'webapi'
-    source = s(route[0:2])
-elif route[0] == 'default.aspx':
-    page = f('referer.query.page')
-    menu = f('referer.query.menu')
-    sourcetype = (page and 'popup') or (menu and 'main') or 'home'
-    source = page or menu or 'home'
-else:
-    sourcetype = 'other'
-    source = route[0]
+    if not path or not re.match(r'[a-z0-9_-]+$', path[0]):
+        sourcetype = 'root'
+    elif path[0] == 's':
+        sourcetype = 'static'
+        source = s(path[2:3])
+    elif not route:
+        sourcetype = 'other'
+    elif re.match(r'(rest-1|meta|query)(\.oauth|\.legacy)?\.v1', route[0]):
+        sourcetype = 'api'
+        source = route[0][:route[0].index('.')]
+    elif route[0] == 'ui.v1':
+        sourcetype = 'gadget'
+        source = f('referer.query.gadgettype') or f('referer.query.gadget') or 'none'
+    elif route[0] == 'entity.v1':
+        sourcetype = 'entity'
+        source = xx(f('referer.query.entity')) or 'none'
+    elif route[0] == 'export.v1':
+        sourcetype = 'export'
+        source = f('referer.query.path')
+    elif route[0:2] == ['gadgetview.mvc', 'rendergadget']:
+        sourcetype = 'gadget'
+        source = f('referer.query.gadgetpath')
+    elif route[0] == 'analyticsintegration.mvc':
+        sourcetype = 'analytics'
+        source = s(route[1:2] + [ah(f('referer.query.rdreport'))])
+    elif route[0] == 'report.mvc':
+        sourcetype = 'report'
+        source = s(route[1:2] + [nn(f('referer.query.report'))])
+    elif route[0] == 'published.mvc':
+        sourcetype = 'mvc'
+        source = xx(s(route[0:2]))
+    elif re.search(r'\.mvc$', route[0]):
+        sourcetype = 'mvc'
+        source = nn(s(route[0:2]))
+    elif route[0] == 'api' and route[1] and re.match(r'report', route[1]):
+        sourcetype = 'report'
+        source = s(route[1:3] + [nn(f('referer.query.report')) or nn(f('referer.query.reportname'))])
+    elif route[0] == 'api':
+        sourcetype = 'webapi'
+        source = s(route[0:2])
+    elif route[0] == 'default.aspx':
+        page = f('referer.query.page')
+        menu = f('referer.query.menu')
+        sourcetype = (page and 'popup') or (menu and 'main') or 'home'
+        source = page or menu or 'home'
+    else:
+        sourcetype = 'other'
+        source = route[0]
 
 if targettype:
     line['v1.target.type'] = targettype
