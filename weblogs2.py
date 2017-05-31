@@ -384,6 +384,9 @@ elif route[0] == 'entity.v1':
 elif route[0] == 'export.v1':
     targettype = 'export'
     target = f('uri.query.path')
+elif route[0] == 'pdf.v1':
+    targettype = 'pdf'
+    target = f('uri.query.menu')
 elif route[0:2] == ['gadgetview.mvc', 'rendergadget']:
     targettype = 'gadget'
     target = f('uri.query.gadgetpath')
@@ -441,6 +444,9 @@ if sourcehost == targethost:
     elif route[0] == 'export.v1':
         sourcetype = 'export'
         source = f('referer.query.path')
+    elif route[0] == 'pdf.v1':
+        sourcetype = 'pdf'
+        source = f('referer.query.menu')
     elif route[0:2] == ['gadgetview.mvc', 'rendergadget']:
         sourcetype = 'gadget'
         source = f('referer.query.gadgetpath')
